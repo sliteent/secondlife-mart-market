@@ -3,6 +3,7 @@ import { ProductCard, Product } from './ProductCard';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Filter } from 'lucide-react';
+import { useProducts, useCategories, LegacyProduct } from '@/hooks/useSupabaseData';
 
 // Sample product data
 const sampleProducts: Product[] = [
@@ -104,36 +105,49 @@ const sampleProducts: Product[] = [
 ];
 
 interface ProductGridProps {
-  onAddToCart?: (product: Product) => void;
+  onAddToCart?: (product: LegacyProduct) => void;
 }
 
 export function ProductGrid({ onAddToCart }: ProductGridProps) {
-  const [products] = useState(sampleProducts);
   const [sortBy, setSortBy] = useState('featured');
   const [filterCondition, setFilterCondition] = useState('all');
   const [filterCategory, setFilterCategory] = useState('all');
 
-  // Filter and sort products
-  const filteredProducts = products.filter(product => {
-    const conditionMatch = filterCondition === 'all' || product.condition.toLowerCase() === filterCondition;
-    const categoryMatch = filterCategory === 'all' || product.category.toLowerCase() === filterCategory.toLowerCase();
-    return conditionMatch && categoryMatch;
-  });
+  const { categories } = useCategories();
+  const { products, loading, error } = useProducts(
+    filterCategory === 'all' ? undefined : filterCategory,
+    filterCondition === 'all' ? undefined : filterCondition
+  );
 
-  const sortedProducts = [...filteredProducts].sort((a, b) => {
-    switch (sortBy) {
-      case 'price-low':
-        return a.price - b.price;
-      case 'price-high':
-        return b.price - a.price;
-      case 'rating':
-        return b.rating - a.rating;
-      case 'newest':
-        return b.id.localeCompare(a.id);
-      default:
-        return 0;
-    }
-  });
+  if (loading) {
+    return (
+      <section className="py-8">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-8">
+            <div className="h-8 bg-gray-200 rounded w-48 mx-auto mb-2 animate-pulse"></div>
+            <div className="h-4 bg-gray-200 rounded w-32 mx-auto animate-pulse"></div>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <div key={i} className="bg-gray-200 rounded-lg h-80 animate-pulse"></div>
+            ))}
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  if (error) {
+    return (
+      <section className="py-8">
+        <div className="container mx-auto px-4">
+          <div className="text-center py-12">
+            <p className="text-red-600">Error loading products: {error}</p>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="py-8">
@@ -143,7 +157,7 @@ export function ProductGrid({ onAddToCart }: ProductGridProps) {
           <div>
             <h2 className="text-2xl font-bold">Featured Products</h2>
             <p className="text-muted-foreground">
-              {sortedProducts.length} products found
+              {products.length} products found
             </p>
           </div>
           
@@ -156,10 +170,11 @@ export function ProductGrid({ onAddToCart }: ProductGridProps) {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Categories</SelectItem>
-                <SelectItem value="electronics">Electronics</SelectItem>
-                <SelectItem value="clothing">Clothing</SelectItem>
-                <SelectItem value="home appliances">Home</SelectItem>
-                <SelectItem value="books">Books</SelectItem>
+                {categories.map((category) => (
+                  <SelectItem key={category.id} value={category.id}>
+                    {category.name}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
 
@@ -191,21 +206,37 @@ export function ProductGrid({ onAddToCart }: ProductGridProps) {
 
         {/* Products Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {sortedProducts.map((product) => (
+          {products.map((product) => (
             <ProductCard
               key={product.id}
-              product={product}
-              onAddToCart={onAddToCart}
+              product={{
+                id: product.id,
+                name: product.name,
+                price: product.price,
+                condition: product.condition === 'new' ? 'New' : 'Used',
+                image: product.images[0] || 'https://via.placeholder.com/400',
+                rating: 4.5, // Default rating
+                reviewCount: 0, // Default review count
+                inStock: product.stock_quantity > 0,
+                category: product.category?.name || 'Unknown'
+              }}
+              onAddToCart={(prod) => onAddToCart?.({
+                id: prod.id,
+                name: prod.name,
+                price: prod.price,
+                condition: prod.condition === 'New' ? 'new' : 'used',
+                category: prod.category,
+                image: prod.image,
+                stock: product.stock_quantity,
+                description: product.description
+              })}
             />
           ))}
         </div>
 
-        {/* Load more button */}
-        {sortedProducts.length > 0 && (
-          <div className="text-center mt-8">
-            <Button variant="outline" size="lg">
-              Load More Products
-            </Button>
+        {products.length === 0 && (
+          <div className="text-center py-12">
+            <p className="text-muted-foreground">No products found matching your criteria.</p>
           </div>
         )}
       </div>

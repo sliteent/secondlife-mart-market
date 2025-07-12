@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { useOrderTracking } from '@/hooks/useSupabaseData';
 
 interface OrderStatus {
   id: string;
@@ -53,24 +54,11 @@ const sampleOrders: Record<string, OrderStatus> = {
 export function OrderTracking() {
   const [orderId, setOrderId] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
-  const [order, setOrder] = useState<OrderStatus | null>(null);
-  const [isSearching, setIsSearching] = useState(false);
-  const [error, setError] = useState('');
+  const { order, orderItems, loading, error, trackOrder } = useOrderTracking(orderId, phoneNumber);
 
-  const handleSearch = async () => {
-    setIsSearching(true);
-    setError('');
-    
-    // Simulate API call
-    setTimeout(() => {
-      const foundOrder = sampleOrders[orderId.toUpperCase()];
-      if (foundOrder) {
-        setOrder(foundOrder);
-      } else {
-        setError('Order not found. Please check your Order ID and phone number.');
-      }
-      setIsSearching(false);
-    }, 1000);
+  const handleSearch = () => {
+    if (!orderId || !phoneNumber) return;
+    trackOrder();
   };
 
   const getStatusIcon = (status: string) => {
@@ -103,7 +91,8 @@ export function OrderTracking() {
     }
   };
 
-  const statusSteps = ['Pending', 'Confirmed', 'Shipped', 'Delivered'];
+  const statusSteps = ['pending', 'confirmed', 'shipped', 'delivered'];
+  const statusLabels = ['Pending', 'Confirmed', 'Shipped', 'Delivered'];
   const currentStepIndex = order ? statusSteps.indexOf(order.status) : -1;
 
   return (
@@ -151,11 +140,11 @@ export function OrderTracking() {
 
             <Button
               onClick={handleSearch}
-              disabled={!orderId || !phoneNumber || isSearching}
+              disabled={!orderId || !phoneNumber || loading}
               className="w-full md:w-auto"
             >
               <Search className="h-4 w-4 mr-2" />
-              {isSearching ? 'Searching...' : 'Track Order'}
+              {loading ? 'Searching...' : 'Track Order'}
             </Button>
           </CardContent>
         </Card>
@@ -167,7 +156,7 @@ export function OrderTracking() {
             <Card>
               <CardHeader>
                 <div className="flex items-center justify-between">
-                  <CardTitle>Order #{order.id}</CardTitle>
+                  <CardTitle>Order #{order.order_id}</CardTitle>
                   <Badge className={getStatusColor(order.status)}>
                     {getStatusIcon(order.status)}
                     <span className="ml-1">{order.status}</span>
@@ -178,23 +167,25 @@ export function OrderTracking() {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                   <div>
                     <Label className="text-sm text-muted-foreground">Order Date</Label>
-                    <p className="font-medium">{new Date(order.orderDate).toLocaleDateString()}</p>
+                    <p className="font-medium">{new Date(order.created_at).toLocaleDateString()}</p>
                   </div>
                   <div>
                     <Label className="text-sm text-muted-foreground">Estimated Delivery</Label>
-                    <p className="font-medium">{new Date(order.estimatedDelivery).toLocaleDateString()}</p>
+                    <p className="font-medium">
+                      {order.estimated_delivery_date ? new Date(order.estimated_delivery_date).toLocaleDateString() : 'TBD'}
+                    </p>
                   </div>
                   <div>
                     <Label className="text-sm text-muted-foreground">Total Amount</Label>
-                    <p className="font-medium">KSh {order.total.toLocaleString()}</p>
+                    <p className="font-medium">KSh {order.total_amount.toLocaleString()}</p>
                   </div>
                 </div>
 
                 {/* Progress Timeline */}
                 <div className="relative">
                   <div className="flex items-center justify-between mb-4">
-                    {statusSteps.map((step, index) => (
-                      <div key={step} className="flex flex-col items-center flex-1">
+                    {statusLabels.map((label, index) => (
+                      <div key={label} className="flex flex-col items-center flex-1">
                         <div
                           className={`w-8 h-8 rounded-full border-2 flex items-center justify-center ${
                             index <= currentStepIndex
@@ -208,7 +199,7 @@ export function OrderTracking() {
                             <span className="text-xs font-medium">{index + 1}</span>
                           )}
                         </div>
-                        <span className="text-xs mt-2 text-center">{step}</span>
+                        <span className="text-xs mt-2 text-center">{label}</span>
                       </div>
                     ))}
                   </div>
@@ -218,7 +209,7 @@ export function OrderTracking() {
                     <div
                       className="h-full bg-primary transition-all duration-500"
                       style={{
-                        width: currentStepIndex >= 0 ? `${(currentStepIndex / (statusSteps.length - 1)) * 100}%` : '0%'
+                        width: currentStepIndex >= 0 ? `${(currentStepIndex / (statusLabels.length - 1)) * 100}%` : '0%'
                       }}
                     />
                   </div>
@@ -233,13 +224,13 @@ export function OrderTracking() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {order.items.map((item, index) => (
-                    <div key={index} className="flex justify-between items-center py-2 border-b last:border-b-0">
+                  {orderItems.map((item) => (
+                    <div key={item.id} className="flex justify-between items-center py-2 border-b last:border-b-0">
                       <div>
-                        <p className="font-medium">{item.name}</p>
+                        <p className="font-medium">{item.product?.name || 'Unknown Product'}</p>
                         <p className="text-sm text-muted-foreground">Quantity: {item.quantity}</p>
                       </div>
-                      <p className="font-medium">KSh {(item.price * item.quantity).toLocaleString()}</p>
+                      <p className="font-medium">KSh {item.total_price.toLocaleString()}</p>
                     </div>
                   ))}
                 </div>
@@ -255,12 +246,18 @@ export function OrderTracking() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <Label className="text-sm text-muted-foreground">Customer Name</Label>
-                    <p className="font-medium">{order.customerName}</p>
+                    <p className="font-medium">{order.customer_name}</p>
                   </div>
                   <div>
                     <Label className="text-sm text-muted-foreground">Delivery Address</Label>
-                    <p className="font-medium">{order.deliveryAddress}</p>
+                    <p className="font-medium">{order.delivery_address}, {order.town}, {order.county}</p>
                   </div>
+                  {order.mpesa_transaction_code && (
+                    <div>
+                      <Label className="text-sm text-muted-foreground">M-Pesa Code</Label>
+                      <p className="font-medium">{order.mpesa_transaction_code}</p>
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>

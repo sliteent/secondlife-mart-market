@@ -44,9 +44,60 @@ export function CheckoutModal({ isOpen, onClose, items, total, onConfirmOrder }:
     if (step > 1) setStep(step - 1);
   };
 
-  const handleConfirmOrder = () => {
-    const orderId = `SL${Date.now().toString().slice(-6)}`;
-    onConfirmOrder({ ...orderData, orderId, items, total });
+  const handleConfirmOrder = async () => {
+    try {
+      // Create order in database
+      const { createOrder } = await import('@/hooks/useSupabaseData');
+      
+      const orderDataForDB = {
+        customer_name: `${orderData.firstName} ${orderData.lastName}`,
+        customer_phone: orderData.phone,
+        customer_email: orderData.email,
+        delivery_address: orderData.address,
+        county: orderData.county,
+        town: orderData.town,
+        total_amount: total,
+        delivery_fee: total > 2000 ? 0 : 200,
+        items: items.map(item => ({
+          product_id: item.id,
+          quantity: item.quantity,
+          unit_price: item.price,
+          total_price: item.price * item.quantity
+        }))
+      };
+
+      const result = await createOrder(orderDataForDB);
+      
+      if (result.success && result.order) {
+        // Verify M-Pesa transaction if code provided
+        if (orderData.mpesaCode) {
+          await fetch(`https://bsqiylycebkxliggotxw.supabase.co/functions/v1/mpesa-payment?action=verify`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              orderId: result.order.order_id,
+              transactionCode: orderData.mpesaCode
+            })
+          });
+        }
+
+        const finalOrderData = {
+          orderId: result.order.order_id,
+          items,
+          total,
+          customerInfo: orderData,
+          mpesaTransactionCode: orderData.mpesaCode,
+          paymentMethod: 'mpesa'
+        };
+        
+        onConfirmOrder(finalOrderData);
+      } else {
+        throw new Error(result.error || 'Failed to create order');
+      }
+    } catch (error) {
+      console.error('Error creating order:', error);
+      // Handle error appropriately - you might want to show a toast or error message
+    }
   };
 
   return (

@@ -7,7 +7,7 @@ import { ShoppingCart, CartItem } from '@/components/ShoppingCart';
 import { CheckoutModal } from '@/components/CheckoutModal';
 import { OrderTracking } from '@/components/OrderTracking';
 import { Footer } from '@/components/Footer';
-import { Product } from '@/components/ProductCard';
+import { LegacyProduct } from '@/hooks/useSupabaseData';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Package } from 'lucide-react';
@@ -19,7 +19,7 @@ const Index = () => {
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const { toast } = useToast();
 
-  const addToCart = (product: Product) => {
+  const addToCart = (product: LegacyProduct) => {
     setCartItems(prev => {
       const existingItem = prev.find(item => item.id === product.id);
       if (existingItem) {
@@ -29,7 +29,14 @@ const Index = () => {
             : item
         );
       }
-      return [...prev, { ...product, quantity: 1 }];
+      return [...prev, { 
+        ...product, 
+        condition: product.condition === 'new' ? 'New' : 'Used',
+        quantity: 1,
+        rating: 4.5,
+        reviewCount: 0,
+        inStock: product.stock > 0
+      } as CartItem];
     });
 
     toast({
