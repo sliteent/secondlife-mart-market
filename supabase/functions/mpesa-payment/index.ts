@@ -4,12 +4,34 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'X-Content-Type-Options': 'nosniff',
+  'X-Frame-Options': 'DENY',
+  'X-XSS-Protection': '1; mode=block',
 };
 
 // Initialize Supabase client
 const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
-const supabase = createClient(supabaseUrl, supabaseAnonKey);
+const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+// Input validation functions
+const sanitizeString = (input: string): string => {
+  return input.replace(/[<>\"'&]/g, '').trim();
+};
+
+const validatePhoneNumber = (phone: string): boolean => {
+  const kenyanPhoneRegex = /^(254|0)[7][0-9]{8}$|^(254|0)[1][0-9]{8}$/;
+  return kenyanPhoneRegex.test(phone.replace(/\s+/g, ''));
+};
+
+const validateMpesaCode = (code: string): boolean => {
+  const mpesaCodeRegex = /^[A-Z0-9]{10}$/;
+  return mpesaCodeRegex.test(code.toUpperCase());
+};
+
+const validateOrderId = (orderId: string): boolean => {
+  return /^SLM[0-9]{6}$/.test(orderId);
+};
 
 interface PaymentRequest {
   orderId: string;
@@ -36,6 +58,45 @@ const handler = async (req: Request): Promise<Response> => {
     if (action === 'initiate') {
       // STK Push initiation
       const { orderId, phone, amount }: PaymentRequest = await req.json();
+      
+      // Input validation
+      if (!validateOrderId(orderId)) {
+        return new Response(JSON.stringify({ error: 'Invalid order ID format' }), {
+          status: 400,
+          headers: { 'Content-Type': 'application/json', ...corsHeaders },
+        });
+      }
+      
+      if (!validatePhoneNumber(phone)) {
+        return new Response(JSON.stringify({ error: 'Invalid phone number format' }), {
+          status: 400,
+          headers: { 'Content-Type': 'application/json', ...corsHeaders },
+        });
+      }
+      
+      if (!amount || amount <= 0 || amount > 1000000) {
+        return new Response(JSON.stringify({ error: 'Invalid amount' }), {
+          status: 400,
+          headers: { 'Content-Type': 'application/json', ...corsHeaders },
+        });
+      }
+      
+      // Verify order exists and matches customer
+      const { data: order, error: orderError } = await supabase
+        .from('orders')
+        .select('*')
+        .eq('order_id', orderId)
+        .eq('customer_phone', phone)
+        .eq('status', 'pending')
+        .single();
+      
+      if (orderError || !order) {
+        console.error('Order verification failed:', orderError);
+        return new Response(JSON.stringify({ error: 'Order not found or already processed' }), {
+          status: 404,
+          headers: { 'Content-Type': 'application/json', ...corsHeaders },
+        });
+      }
       
       console.log(`Initiating STK Push for order ${orderId}, phone ${phone}, amount ${amount}`);
       
@@ -67,13 +128,28 @@ const handler = async (req: Request): Promise<Response> => {
       // M-Pesa payment callback/confirmation
       const { orderId, transactionCode, status }: PaymentCallbackRequest = await req.json();
       
+      // Input validation
+      if (!validateOrderId(orderId)) {
+        return new Response(JSON.stringify({ error: 'Invalid order ID' }), {
+          status: 400,
+          headers: { 'Content-Type': 'application/json', ...corsHeaders },
+        });
+      }
+      
+      if (!validateMpesaCode(transactionCode)) {
+        return new Response(JSON.stringify({ error: 'Invalid transaction code' }), {
+          status: 400,
+          headers: { 'Content-Type': 'application/json', ...corsHeaders },
+        });
+      }
+      
       console.log(`Processing payment callback for order ${orderId}, transaction ${transactionCode}, status ${status}`);
       
       // Update order with transaction code and status
       const { error } = await supabase
         .from('orders')
         .update({
-          mpesa_transaction_code: transactionCode,
+          mpesa_transaction_code: sanitizeString(transactionCode.toUpperCase()),
           status: status === 'success' ? 'confirmed' : 'pending',
           updated_at: new Date().toISOString()
         })
@@ -81,7 +157,10 @@ const handler = async (req: Request): Promise<Response> => {
 
       if (error) {
         console.error('Error updating order:', error);
-        throw error;
+        return new Response(JSON.stringify({ error: 'Failed to update order' }), {
+          status: 500,
+          headers: { 'Content-Type': 'application/json', ...corsHeaders },
+        });
       }
 
       return new Response(JSON.stringify({
@@ -100,6 +179,21 @@ const handler = async (req: Request): Promise<Response> => {
       // Verify transaction manually
       const { orderId, transactionCode } = await req.json();
       
+      // Input validation
+      if (!validateOrderId(orderId)) {
+        return new Response(JSON.stringify({ error: 'Invalid order ID' }), {
+          status: 400,
+          headers: { 'Content-Type': 'application/json', ...corsHeaders },
+        });
+      }
+      
+      if (!validateMpesaCode(transactionCode)) {
+        return new Response(JSON.stringify({ error: 'Invalid transaction code' }), {
+          status: 400,
+          headers: { 'Content-Type': 'application/json', ...corsHeaders },
+        });
+      }
+      
       console.log(`Verifying transaction ${transactionCode} for order ${orderId}`);
       
       // In production, you'd verify with Safaricom API
@@ -107,7 +201,7 @@ const handler = async (req: Request): Promise<Response> => {
       const { error } = await supabase
         .from('orders')
         .update({
-          mpesa_transaction_code: transactionCode,
+          mpesa_transaction_code: sanitizeString(transactionCode.toUpperCase()),
           status: 'confirmed',
           updated_at: new Date().toISOString()
         })
@@ -115,7 +209,10 @@ const handler = async (req: Request): Promise<Response> => {
 
       if (error) {
         console.error('Error verifying transaction:', error);
-        throw error;
+        return new Response(JSON.stringify({ error: 'Failed to verify transaction' }), {
+          status: 500,
+          headers: { 'Content-Type': 'application/json', ...corsHeaders },
+        });
       }
 
       return new Response(JSON.stringify({

@@ -14,6 +14,45 @@ export type Database = {
   }
   public: {
     Tables: {
+      audit_logs: {
+        Row: {
+          action: string
+          created_at: string | null
+          id: string
+          ip_address: unknown | null
+          new_values: Json | null
+          old_values: Json | null
+          record_id: string | null
+          table_name: string | null
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          action: string
+          created_at?: string | null
+          id?: string
+          ip_address?: unknown | null
+          new_values?: Json | null
+          old_values?: Json | null
+          record_id?: string | null
+          table_name?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string | null
+          id?: string
+          ip_address?: unknown | null
+          new_values?: Json | null
+          old_values?: Json | null
+          record_id?: string | null
+          table_name?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       categories: {
         Row: {
           created_at: string
@@ -198,6 +237,7 @@ export type Database = {
           display_name: string | null
           id: string
           phone: string | null
+          role: string | null
           town: string | null
           updated_at: string
           user_id: string
@@ -209,6 +249,7 @@ export type Database = {
           display_name?: string | null
           id?: string
           phone?: string | null
+          role?: string | null
           town?: string | null
           updated_at?: string
           user_id: string
@@ -220,6 +261,7 @@ export type Database = {
           display_name?: string | null
           id?: string
           phone?: string | null
+          role?: string | null
           town?: string | null
           updated_at?: string
           user_id?: string
@@ -234,6 +276,14 @@ export type Database = {
       generate_order_id: {
         Args: Record<PropertyKey, never>
         Returns: string
+      }
+      get_current_user_role: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
+      has_role: {
+        Args: { _user_id: string; _role: string }
+        Returns: boolean
       }
     }
     Enums: {
