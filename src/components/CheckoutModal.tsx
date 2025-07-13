@@ -143,15 +143,15 @@ export function CheckoutModal({ isOpen, onClose, items, total, onConfirmOrder }:
               {step === 1 && (
                 <Card>
                   <CardHeader>
-                    <CardTitle className="flex items-center">
-                      <User className="h-5 w-5 mr-2" />
+                    <CardTitle className="text-base flex items-center">
+                      <User className="h-4 w-4 mr-2" />
                       Personal Information
                     </CardTitle>
                   </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <CardContent className="space-y-3">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                       <div>
-                        <Label htmlFor="firstName">First Name *</Label>
+                        <Label htmlFor="firstName" className="text-sm">First Name *</Label>
                         <Input
                           id="firstName"
                           value={orderData.firstName}
@@ -160,9 +160,10 @@ export function CheckoutModal({ isOpen, onClose, items, total, onConfirmOrder }:
                         />
                       </div>
                       <div>
-                        <Label htmlFor="lastName">Last Name *</Label>
+                        <Label htmlFor="lastName" className="text-sm">Last Name *</Label>
                         <Input
                           id="lastName"
+                          className="text-sm"
                           value={orderData.lastName}
                           onChange={(e) => handleInputChange('lastName', e.target.value)}
                           required
@@ -170,9 +171,10 @@ export function CheckoutModal({ isOpen, onClose, items, total, onConfirmOrder }:
                       </div>
                     </div>
                     <div>
-                      <Label htmlFor="phone">Phone Number *</Label>
+                      <Label htmlFor="phone" className="text-sm">Phone Number *</Label>
                       <Input
                         id="phone"
+                        className="text-sm"
                         placeholder="e.g., 0722123456"
                         value={orderData.phone}
                         onChange={(e) => handleInputChange('phone', e.target.value)}
@@ -180,10 +182,11 @@ export function CheckoutModal({ isOpen, onClose, items, total, onConfirmOrder }:
                       />
                     </div>
                     <div>
-                      <Label htmlFor="email">Email Address</Label>
+                      <Label htmlFor="email" className="text-sm">Email Address</Label>
                       <Input
                         id="email"
                         type="email"
+                        className="text-sm"
                         value={orderData.email}
                         onChange={(e) => handleInputChange('email', e.target.value)}
                       />
@@ -195,17 +198,18 @@ export function CheckoutModal({ isOpen, onClose, items, total, onConfirmOrder }:
               {step === 2 && (
                 <Card>
                   <CardHeader>
-                    <CardTitle className="flex items-center">
-                      <MapPin className="h-5 w-5 mr-2" />
+                    <CardTitle className="text-base flex items-center">
+                      <MapPin className="h-4 w-4 mr-2" />
                       Delivery Information
                     </CardTitle>
                   </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <CardContent className="space-y-3">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                       <div>
-                        <Label htmlFor="county">County *</Label>
+                        <Label htmlFor="county" className="text-sm">County *</Label>
                         <Input
                           id="county"
+                          className="text-sm"
                           placeholder="e.g., Nairobi"
                           value={orderData.county}
                           onChange={(e) => handleInputChange('county', e.target.value)}
@@ -213,9 +217,10 @@ export function CheckoutModal({ isOpen, onClose, items, total, onConfirmOrder }:
                         />
                       </div>
                       <div>
-                        <Label htmlFor="town">Town/City *</Label>
+                        <Label htmlFor="town" className="text-sm">Town/City *</Label>
                         <Input
                           id="town"
+                          className="text-sm"
                           placeholder="e.g., Westlands"
                           value={orderData.town}
                           onChange={(e) => handleInputChange('town', e.target.value)}
@@ -224,9 +229,10 @@ export function CheckoutModal({ isOpen, onClose, items, total, onConfirmOrder }:
                       </div>
                     </div>
                     <div>
-                      <Label htmlFor="address">Delivery Address *</Label>
+                      <Label htmlFor="address" className="text-sm">Delivery Address *</Label>
                       <Textarea
                         id="address"
+                        className="text-sm"
                         placeholder="Building name, floor, apartment/office number, street name..."
                         value={orderData.address}
                         onChange={(e) => handleInputChange('address', e.target.value)}
@@ -234,9 +240,10 @@ export function CheckoutModal({ isOpen, onClose, items, total, onConfirmOrder }:
                       />
                     </div>
                     <div>
-                      <Label htmlFor="notes">Additional Notes</Label>
+                      <Label htmlFor="notes" className="text-sm">Additional Notes</Label>
                       <Textarea
                         id="notes"
+                        className="text-sm"
                         placeholder="Any special delivery instructions..."
                         value={orderData.notes}
                         onChange={(e) => handleInputChange('notes', e.target.value)}
@@ -249,43 +256,70 @@ export function CheckoutModal({ isOpen, onClose, items, total, onConfirmOrder }:
               {step === 3 && (
                 <Card>
                   <CardHeader>
-                    <CardTitle className="flex items-center">
-                      <CreditCard className="h-5 w-5 mr-2" />
-                      M-Pesa Payment
+                    <CardTitle className="text-base flex items-center">
+                      <Phone className="h-4 w-4 mr-2" />
+                      Lipa na M-Pesa Payment
                     </CardTitle>
                   </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                      <h3 className="font-semibold text-green-800 mb-2">Payment Instructions:</h3>
-                      <ol className="list-decimal list-inside space-y-1 text-sm text-green-700">
+                  <CardContent className="space-y-3">
+                    <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+                      <h3 className="text-sm font-semibold text-green-800 mb-2">Payment Instructions:</h3>
+                      <ol className="list-decimal list-inside space-y-1 text-xs text-green-700">
                         <li>Go to M-Pesa on your phone</li>
                         <li>Select "Lipa na M-Pesa"</li>
-                        <li>Select "Buy Goods and Services"</li>
-                        <li>Enter Till Number: <strong>0110299083</strong></li>
+                        <li>Select "Pay Bill"</li>
+                        <li>Enter Business Number: <strong>542542</strong></li>
+                        <li>Enter Account Number: <strong>02304374923050</strong></li>
                         <li>Enter Amount: <strong>KSh {total.toLocaleString()}</strong></li>
                         <li>Enter your M-Pesa PIN and send</li>
-                        <li>Copy the M-Pesa transaction code below</li>
+                        <li>Wait for STK Push on your phone</li>
                       </ol>
                     </div>
                     
+                    <Button 
+                      onClick={async () => {
+                        try {
+                          const response = await fetch(`https://bsqiylycebkxliggotxw.supabase.co/functions/v1/mpesa-payment?action=initiate`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                              phone: orderData.phone,
+                              amount: total
+                            })
+                          });
+                          const result = await response.json();
+                          if (result.success) {
+                            alert('STK Push sent to your phone. Please enter your M-Pesa PIN.');
+                          } else {
+                            alert('Failed to send STK Push: ' + result.error);
+                          }
+                        } catch (error) {
+                          alert('Error sending STK Push');
+                        }
+                      }}
+                      className="w-full text-sm"
+                      disabled={!orderData.phone}
+                    >
+                      Send STK Push to {orderData.phone}
+                    </Button>
+                    
                     <div>
-                      <Label htmlFor="mpesaCode">M-Pesa Transaction Code *</Label>
+                      <Label htmlFor="mpesaCode" className="text-sm">M-Pesa Transaction Code (Optional)</Label>
                       <Input
                         id="mpesaCode"
-                        placeholder="e.g., QCJ7I5M9NX"
+                        className="text-sm"
+                        placeholder="e.g., QCJ7I5M9NX (if you paid manually)"
                         value={orderData.mpesaCode}
                         onChange={(e) => handleInputChange('mpesaCode', e.target.value)}
-                        required
                       />
                       <p className="text-xs text-muted-foreground mt-1">
-                        You'll receive this code via SMS after successful payment
+                        Enter this only if you paid manually. STK Push payments are automatically verified.
                       </p>
                     </div>
 
-                    <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
-                      <p className="text-sm text-yellow-800">
-                        <strong>Note:</strong> Your order will be processed once we verify your M-Pesa payment. 
-                        You'll receive confirmation via SMS.
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                      <p className="text-xs text-blue-800">
+                        <strong>Note:</strong> Use STK Push for instant payment verification, or pay manually and enter the transaction code.
                       </p>
                     </div>
                   </CardContent>
@@ -342,13 +376,13 @@ export function CheckoutModal({ isOpen, onClose, items, total, onConfirmOrder }:
           <Button variant="outline" onClick={step > 1 ? handleBack : onClose}>
             {step > 1 ? 'Back' : 'Cancel'}
           </Button>
-          <Button 
+            <Button 
             onClick={step < 3 ? handleNext : handleConfirmOrder}
             disabled={
               (step === 1 && (!orderData.firstName || !orderData.lastName || !orderData.phone)) ||
-              (step === 2 && (!orderData.county || !orderData.town || !orderData.address)) ||
-              (step === 3 && !orderData.mpesaCode)
+              (step === 2 && (!orderData.county || !orderData.town || !orderData.address))
             }
+            className="text-sm"
           >
             {step < 3 ? 'Next' : 'Confirm Order'}
           </Button>

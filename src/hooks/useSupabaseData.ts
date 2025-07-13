@@ -277,9 +277,116 @@ export const createOrder = async (orderData: {
 
     if (itemsError) throw itemsError;
 
+    // Send email notification to admin
+    try {
+      await supabase.functions.invoke('send-order-email', {
+        body: {
+          orderId: order.order_id,
+          orderData: {
+            customer_name: order.customer_name,
+            customer_phone: order.customer_phone,
+            customer_email: order.customer_email,
+            delivery_address: order.delivery_address,
+            county: order.county,
+            town: order.town,
+            total_amount: order.total_amount,
+            items: orderData.items.map(item => ({
+              product_name: 'Product', // You might want to fetch product names here
+              quantity: item.quantity,
+              unit_price: item.unit_price,
+              total_price: item.total_price
+            }))
+          }
+        }
+      });
+    } catch (emailError) {
+      console.warn('Failed to send admin email notification:', emailError);
+      // Don't fail the order creation if email fails
+    }
+
     return { success: true, order };
   } catch (error: any) {
     console.error('Error creating order:', error);
     return { success: false, error: error.message };
   }
 };
+
+// Hook for accessing Supabase data in components
+export function useSupabaseData() {
+  const [products, setProducts] = useState<LegacyProduct[]>([]);
+  const [categories, setCategories] = useState<any[]>([]);
+  const [orders, setOrders] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchProducts = async () => {
+    const { data, error } = await supabase
+      .from('products')
+      .select(`
+        *,
+        categories (
+          name
+        )
+      `)
+      .eq('is_active', true);
+    
+    if (error) {
+      console.error('Error fetching products:', error);
+      return;
+    }
+    
+    const formattedProducts = data?.map(product => ({
+      id: product.id,
+      name: product.name,
+      description: product.description || '',
+      price: product.price,
+      image: product.images?.[0] || '',
+      condition: product.condition as 'new' | 'used',
+      stock: product.stock_quantity,
+      category: product.categories?.name || 'Uncategorized'
+    })) || [];
+    
+    setProducts(formattedProducts);
+  };
+
+  const fetchCategories = async () => {
+    const { data, error } = await supabase
+      .from('categories')
+      .select('*');
+    
+    if (!error && data) {
+      setCategories(data);
+    }
+  };
+
+  const fetchOrders = async () => {
+    const { data, error } = await supabase
+      .from('orders')
+      .select('*')
+      .order('created_at', { ascending: false });
+    
+    if (!error && data) {
+      setOrders(data);
+    }
+  };
+
+  const refetchProducts = () => fetchProducts();
+  const refetchOrders = () => fetchOrders();
+
+  useEffect(() => {
+    const loadData = async () => {
+      setLoading(true);
+      await Promise.all([fetchProducts(), fetchCategories(), fetchOrders()]);
+      setLoading(false);
+    };
+    loadData();
+  }, []);
+
+  return {
+    products,
+    categories,
+    orders,
+    loading,
+    refetchProducts,
+    refetchOrders
+  };
+}

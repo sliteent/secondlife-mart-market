@@ -1,4 +1,7 @@
 project_id = "bsqiylycebkxliggotxw"
 
 [functions.mpesa-payment]
-verify_jwt = true
+verify_jwt = false
+
+[functions.send-order-email]
+verify_jwt = false

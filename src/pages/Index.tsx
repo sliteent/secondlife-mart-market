@@ -6,14 +6,15 @@ import { ProductGrid } from '@/components/ProductGrid';
 import { ShoppingCart, CartItem } from '@/components/ShoppingCart';
 import { CheckoutModal } from '@/components/CheckoutModal';
 import { OrderTracking } from '@/components/OrderTracking';
+import { AdminPanel } from '@/components/AdminPanel';
 import { Footer } from '@/components/Footer';
 import { LegacyProduct } from '@/hooks/useSupabaseData';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
-import { Package } from 'lucide-react';
+import { Package, Settings } from 'lucide-react';
 
 const Index = () => {
-  const [currentView, setCurrentView] = useState<'home' | 'track'>('home');
+  const [currentView, setCurrentView] = useState<'home' | 'track' | 'admin'>('home');
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
@@ -112,6 +113,13 @@ const Index = () => {
             <Package className="h-4 w-4 mr-2" />
             Track Order
           </Button>
+          <Button
+            variant={currentView === 'admin' ? 'default' : 'outline'}
+            onClick={() => setCurrentView('admin')}
+          >
+            <Settings className="h-4 w-4 mr-2" />
+            Admin
+          </Button>
         </div>
       </div>
 
@@ -122,8 +130,10 @@ const Index = () => {
           <CategoryGrid />
           <ProductGrid onAddToCart={addToCart} />
         </>
-      ) : (
+      ) : currentView === 'track' ? (
         <OrderTracking />
+      ) : (
+        <AdminPanel />
       )}
 
       <Footer />
