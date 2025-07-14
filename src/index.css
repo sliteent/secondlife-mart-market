@@ -58,6 +58,10 @@ All colors MUST be HSL.
     /* Animations */
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     --transition-fast: all 0.15s ease-out;
+    
+    /* Product cards */
+    --card-hover-scale: 1.02;
+    --card-hover-shadow: 0 20px 40px hsl(0 0% 0% / 0.15);
 
     --radius: 0.5rem;
 
@@ -125,4 +129,19 @@ All colors MUST be HSL.
   body {
     @apply bg-background text-foreground;
   }
+  
+  /* Custom utility classes */
+  .product-card-hover {
+    transition: var(--transition-smooth);
+  }
+  
+  .product-card-hover:hover {
+    transform: scale(var(--card-hover-scale));
+    box-shadow: var(--card-hover-shadow);
+  }
+  
+  .image-fallback {
+    @apply bg-muted flex items-center justify-center text-muted-foreground;
+  }
+}
 }

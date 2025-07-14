@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Search, ShoppingCart, User, Menu, X } from 'lucide-react';
+import { Search, ShoppingCart, User, Menu, X, Package, Phone } from 'lucide-react';
+import logo from '@/assets/logo.png';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -7,59 +8,93 @@ import { Badge } from '@/components/ui/badge';
 interface HeaderProps {
   cartItemsCount?: number;
   onCartClick?: () => void;
+  onSearchChange?: (query: string) => void;
+  onNavigate?: (section: string) => void;
+  currentSection?: string;
 }
 
-export function Header({ cartItemsCount = 0, onCartClick }: HeaderProps) {
+export function Header({ 
+  cartItemsCount = 0, 
+  onCartClick, 
+  onSearchChange, 
+  onNavigate,
+  currentSection = 'home'
+}: HeaderProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
-  const toggleMobileMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen);
+  const handleSearchChange = (value: string) => {
+    setSearchQuery(value);
+    onSearchChange?.(value);
+  };
+
+  const handleNavClick = (section: string) => {
+    onNavigate?.(section);
+    setIsMobileMenuOpen(false);
+  };
+
+  const navItems = [
+    { id: 'home', label: 'Home', icon: null },
+    { id: 'categories', label: 'Categories', icon: null },
+    { id: 'track', label: 'Track Order', icon: Package },
+    { id: 'contact', label: 'Contact', icon: Phone },
+  ];
+
+  const toggleMobileMenu = () => {
+    setIsMobileMenuOpen(!isMobileMenuOpen);
+  };
 
   return (
-    <header className="bg-background border-b sticky top-0 z-50 shadow-sm">
+    <header className="bg-background border-b border-border sticky top-0 z-50 shadow-sm">
       <div className="container mx-auto px-4">
-        {/* Top bar */}
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <div className="flex items-center space-x-4">
-            <button 
-              className="md:hidden"
-              onClick={toggleMobileMenu}
-            >
-              {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-            </button>
-            <h1 className="text-xl md:text-2xl font-bold text-primary">
-              SecondLife Mart
-            </h1>
+          <div className="flex items-center gap-3 flex-shrink-0">
+            <img src={logo} alt="SecondLife Mart Market" className="h-10 w-10" />
+            <div>
+              <h1 className="text-lg font-bold text-primary">SecondLife Mart</h1>
+              <p className="text-xs text-muted-foreground hidden sm:block">Market</p>
+            </div>
           </div>
 
-          {/* Search bar - Desktop */}
-          <div className="hidden md:flex flex-1 max-w-2xl mx-8">
+          {/* Desktop Navigation */}
+          <nav className="hidden md:flex items-center space-x-8">
+            {navItems.map((item) => (
+              <button
+                key={item.id}
+                onClick={() => handleNavClick(item.id)}
+                className={`flex items-center gap-2 text-sm font-medium transition-colors hover:text-primary ${
+                  currentSection === item.id ? 'text-primary' : 'text-foreground'
+                }`}
+              >
+                {item.icon && <item.icon className="h-4 w-4" />}
+                {item.label}
+              </button>
+            ))}
+          </nav>
+
+          {/* Search Bar - Desktop */}
+          <div className="hidden lg:flex flex-1 max-w-lg mx-8">
             <div className="relative w-full">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
               <Input
                 type="text"
-                placeholder="Search for products, categories..."
+                placeholder="Search products..."
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 w-full"
+                onChange={(e) => handleSearchChange(e.target.value)}
+                className="pl-10 h-10 border-border/50 focus:border-primary"
               />
             </div>
           </div>
 
-          {/* Right side actions */}
-          <div className="flex items-center space-x-4">
-            {/* Search icon - Mobile */}
-            <Button variant="ghost" size="icon" className="md:hidden">
-              <Search className="h-5 w-5" />
-            </Button>
-
-            {/* User account */}
-            <Button variant="ghost" size="icon">
+          {/* Actions */}
+          <div className="flex items-center space-x-2">
+            {/* User Account */}
+            <Button variant="ghost" size="icon" className="hidden md:flex">
               <User className="h-5 w-5" />
             </Button>
 
-            {/* Cart */}
+            {/* Shopping Cart */}
             <Button 
               variant="ghost" 
               size="icon" 
@@ -76,33 +111,55 @@ export function Header({ cartItemsCount = 0, onCartClick }: HeaderProps) {
                 </Badge>
               )}
             </Button>
+
+            {/* Mobile Menu Button */}
+            <Button
+              variant="ghost"
+              size="icon"
+              className="md:hidden"
+              onClick={toggleMobileMenu}
+            >
+              {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            </Button>
           </div>
         </div>
 
-        {/* Mobile search bar */}
-        <div className="md:hidden pb-4">
+        {/* Mobile Search Bar */}
+        <div className="lg:hidden pb-3">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
             <Input
               type="text"
               placeholder="Search products..."
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 w-full"
+              onChange={(e) => handleSearchChange(e.target.value)}
+              className="pl-10 h-10 w-full border-border/50 focus:border-primary"
             />
           </div>
         </div>
 
-        {/* Mobile navigation menu */}
+        {/* Mobile Navigation Menu */}
         {isMobileMenuOpen && (
-          <div className="md:hidden border-t bg-background py-4">
-            <nav className="space-y-2">
-              <a href="#" className="block px-4 py-2 text-sm hover:bg-accent rounded">Electronics</a>
-              <a href="#" className="block px-4 py-2 text-sm hover:bg-accent rounded">Clothing</a>
-              <a href="#" className="block px-4 py-2 text-sm hover:bg-accent rounded">Home Appliances</a>
-              <a href="#" className="block px-4 py-2 text-sm hover:bg-accent rounded">Books</a>
-              <a href="#" className="block px-4 py-2 text-sm hover:bg-accent rounded">Track Order</a>
-            </nav>
+          <div className="md:hidden border-t border-border py-4 bg-background">
+            <div className="flex flex-col space-y-1">
+              {navItems.map((item) => (
+                <Button
+                  key={item.id}
+                  variant="ghost"
+                  className={`justify-start ${
+                    currentSection === item.id ? 'bg-primary/10 text-primary' : ''
+                  }`}
+                  onClick={() => handleNavClick(item.id)}
+                >
+                  {item.icon && <item.icon className="h-4 w-4 mr-2" />}
+                  {item.label}
+                </Button>
+              ))}
+              <Button variant="ghost" className="justify-start">
+                <User className="h-4 w-4 mr-2" />
+                Account
+              </Button>
+            </div>
           </div>
         )}
       </div>

@@ -1,7 +1,8 @@
-import { ShoppingCart, Heart, Star } from 'lucide-react';
+import { ShoppingCart, Heart, Star, ImageOff } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { useState } from 'react';
 
 export interface Product {
   id: string;
@@ -23,27 +24,43 @@ interface ProductCardProps {
 }
 
 export function ProductCard({ product, onAddToCart, onToggleWishlist }: ProductCardProps) {
+  const [imageError, setImageError] = useState(false);
+  const [isWishlisted, setIsWishlisted] = useState(false);
+  
   const discountPercentage = product.originalPrice 
     ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
     : 0;
 
+  const handleWishlistClick = () => {
+    setIsWishlisted(!isWishlisted);
+    onToggleWishlist?.(product);
+  };
+
   return (
-    <Card className="group hover:shadow-lg transition-shadow h-full">
-      <CardContent className="p-4">
+    <Card className="group product-card-hover h-full border border-border/50 overflow-hidden">
+      <CardContent className="p-0">
         {/* Image and badges */}
-        <div className="relative mb-3">
-          <div className="aspect-square bg-gray-100 rounded-lg overflow-hidden">
-            <img
-              src={product.image}
-              alt={product.name}
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-            />
+        <div className="relative">
+          <div className="aspect-square bg-muted rounded-none overflow-hidden">
+            {imageError ? (
+              <div className="image-fallback w-full h-full">
+                <ImageOff className="h-12 w-12" />
+              </div>
+            ) : (
+              <img
+                src={product.image}
+                alt={product.name}
+                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                onError={() => setImageError(true)}
+                loading="lazy"
+              />
+            )}
           </div>
           
           {/* Condition badge */}
           <Badge 
             variant={product.condition === 'New' ? 'default' : 'secondary'}
-            className="absolute top-2 left-2 text-xs"
+            className="absolute top-3 left-3 text-xs font-medium"
           >
             {product.condition}
           </Badge>
@@ -52,7 +69,7 @@ export function ProductCard({ product, onAddToCart, onToggleWishlist }: ProductC
           {discountPercentage > 0 && (
             <Badge 
               variant="destructive"
-              className="absolute top-2 right-2 text-xs"
+              className="absolute top-3 right-3 text-xs font-medium"
             >
               -{discountPercentage}%
             </Badge>
@@ -62,27 +79,27 @@ export function ProductCard({ product, onAddToCart, onToggleWishlist }: ProductC
           <Button
             variant="ghost"
             size="icon"
-            className="absolute bottom-2 right-2 h-8 w-8 bg-white/80 hover:bg-white"
-            onClick={() => onToggleWishlist?.(product)}
+            className="absolute bottom-3 right-3 h-9 w-9 bg-background/90 hover:bg-background shadow-md"
+            onClick={handleWishlistClick}
           >
-            <Heart className="h-4 w-4" />
+            <Heart className={`h-4 w-4 ${isWishlisted ? 'fill-destructive text-destructive' : ''}`} />
           </Button>
         </div>
 
         {/* Product info */}
-        <div className="space-y-2">
-          <h3 className="font-medium text-sm line-clamp-2 h-10">{product.name}</h3>
+        <div className="p-4 space-y-3">
+          <h3 className="font-semibold text-sm leading-tight line-clamp-2 h-10">{product.name}</h3>
           
           {/* Rating */}
-          <div className="flex items-center space-x-1">
+          <div className="flex items-center gap-2">
             <div className="flex">
               {[...Array(5)].map((_, i) => (
                 <Star
                   key={i}
-                  className={`h-3 w-3 ${
+                  className={`h-3.5 w-3.5 ${
                     i < Math.floor(product.rating)
-                      ? 'text-yellow-500 fill-current'
-                      : 'text-gray-300'
+                      ? 'text-yellow-500 fill-yellow-500'
+                      : 'text-muted-foreground/30'
                   }`}
                 />
               ))}
@@ -91,8 +108,8 @@ export function ProductCard({ product, onAddToCart, onToggleWishlist }: ProductC
           </div>
 
           {/* Price */}
-          <div className="flex items-center space-x-2">
-            <span className="font-bold text-primary">
+          <div className="flex items-center gap-2">
+            <span className="font-bold text-lg text-primary">
               KSh {product.price.toLocaleString()}
             </span>
             {product.originalPrice && (
@@ -102,26 +119,25 @@ export function ProductCard({ product, onAddToCart, onToggleWishlist }: ProductC
             )}
           </div>
 
-          {/* Stock status */}
-          <div className="text-xs">
-            {product.inStock ? (
-              <span className="text-green-600">In Stock</span>
-            ) : (
-              <span className="text-red-600">Out of Stock</span>
-            )}
-          </div>
+          {/* Stock status and Add to cart */}
+          <div className="space-y-2">
+            <div className="text-xs">
+              {product.inStock ? (
+                <span className="text-success font-medium">✓ In Stock</span>
+              ) : (
+                <span className="text-destructive font-medium">✗ Out of Stock</span>
+              )}
+            </div>
 
-          {/* Add to cart button */}
-          <Button
-            variant="cart"
-            size="sm"
-            className="w-full mt-3"
-            disabled={!product.inStock}
-            onClick={() => onAddToCart?.(product)}
-          >
-            <ShoppingCart className="h-4 w-4 mr-1" />
-            Add to Cart
-          </Button>
+            <Button
+              className="w-full h-10 font-medium"
+              disabled={!product.inStock}
+              onClick={() => onAddToCart?.(product)}
+            >
+              <ShoppingCart className="h-4 w-4 mr-2" />
+              Add to Cart
+            </Button>
+          </div>
         </div>
       </CardContent>
     </Card>

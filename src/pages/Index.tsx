@@ -1,12 +1,12 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Header } from '@/components/Header';
 import { HeroSection } from '@/components/HeroSection';
 import { CategoryGrid } from '@/components/CategoryGrid';
 import { ProductGrid } from '@/components/ProductGrid';
 import { ShoppingCart, CartItem } from '@/components/ShoppingCart';
 import { CheckoutModal } from '@/components/CheckoutModal';
-import { OrderTracking } from '@/components/OrderTracking';
-import { AdminPanel } from '@/components/AdminPanel';
+import { OrderTrackingSection } from '@/components/OrderTrackingSection';
+import { ContactSection } from '@/components/ContactSection';
 import { Footer } from '@/components/Footer';
 import { LegacyProduct } from '@/hooks/useSupabaseData';
 import { useToast } from '@/hooks/use-toast';
@@ -14,10 +14,11 @@ import { Button } from '@/components/ui/button';
 import { Package, Settings } from 'lucide-react';
 
 const Index = () => {
-  const [currentView, setCurrentView] = useState<'home' | 'track' | 'admin'>('home');
+  const [currentView, setCurrentView] = useState<'home' | 'track' | 'contact' | 'categories'>('home');
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   const { toast } = useToast();
 
   const addToCart = (product: LegacyProduct) => {
@@ -95,46 +96,31 @@ const Index = () => {
       <Header 
         cartItemsCount={cartItemsCount}
         onCartClick={() => setIsCartOpen(true)}
+        onSearchChange={setSearchQuery}
+        onNavigate={setCurrentView}
+        currentSection={currentView}
       />
-      
-      {/* Navigation */}
-      <div className="container mx-auto px-4 py-4">
-        <div className="flex justify-center space-x-4">
-          <Button
-            variant={currentView === 'home' ? 'default' : 'outline'}
-            onClick={() => setCurrentView('home')}
-          >
-            Shop Products
-          </Button>
-          <Button
-            variant={currentView === 'track' ? 'default' : 'outline'}
-            onClick={() => setCurrentView('track')}
-          >
-            <Package className="h-4 w-4 mr-2" />
-            Track Order
-          </Button>
-          <Button
-            variant={currentView === 'admin' ? 'default' : 'outline'}
-            onClick={() => setCurrentView('admin')}
-          >
-            <Settings className="h-4 w-4 mr-2" />
-            Admin
-          </Button>
-        </div>
-      </div>
 
       {/* Main Content */}
       {currentView === 'home' ? (
         <>
-          <HeroSection />
+          <HeroSection 
+            onSearchChange={setSearchQuery}
+            onShopNow={() => setCurrentView('categories')}
+          />
           <CategoryGrid />
-          <ProductGrid onAddToCart={addToCart} />
+          <ProductGrid onAddToCart={addToCart} searchQuery={searchQuery} />
+        </>
+      ) : currentView === 'categories' ? (
+        <>
+          <CategoryGrid />
+          <ProductGrid onAddToCart={addToCart} searchQuery={searchQuery} />
         </>
       ) : currentView === 'track' ? (
-        <OrderTracking />
-      ) : (
-        <AdminPanel />
-      )}
+        <OrderTrackingSection />
+      ) : currentView === 'contact' ? (
+        <ContactSection />
+      ) : null}
 
       <Footer />
 
