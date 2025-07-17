@@ -46,7 +46,7 @@ export function CheckoutModal({ isOpen, onClose, items, total, onConfirmOrder }:
 
   const handleConfirmOrder = async () => {
     try {
-      // Create order in database
+      // Import the createOrder function dynamically
       const { createOrder } = await import('@/hooks/useSupabaseData');
       
       const orderDataForDB = {
@@ -92,11 +92,11 @@ export function CheckoutModal({ isOpen, onClose, items, total, onConfirmOrder }:
         
         onConfirmOrder(finalOrderData);
       } else {
-        throw new Error(result.error || 'Failed to create order');
+        alert('Error creating order: ' + (result.error || 'Unknown error'));
       }
     } catch (error) {
       console.error('Error creating order:', error);
-      // Handle error appropriately - you might want to show a toast or error message
+      alert('Error creating order. Please try again.');
     }
   };
 
@@ -284,17 +284,19 @@ export function CheckoutModal({ isOpen, onClose, items, total, onConfirmOrder }:
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({
                               phone: orderData.phone,
-                              amount: total
+                              amount: total,
+                              orderId: `TEMP_${Date.now()}`
                             })
                           });
                           const result = await response.json();
                           if (result.success) {
-                            alert('STK Push sent to your phone. Please enter your M-Pesa PIN.');
+                            alert('STK Push sent to your phone. Please enter your M-Pesa PIN to complete payment.');
                           } else {
                             alert('Failed to send STK Push: ' + result.error);
                           }
                         } catch (error) {
-                          alert('Error sending STK Push');
+                          console.error('Error sending STK Push:', error);
+                          alert('Error sending STK Push. Please try again.');
                         }
                       }}
                       className="w-full text-sm"

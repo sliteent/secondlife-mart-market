@@ -57,16 +57,9 @@ const handler = async (req: Request): Promise<Response> => {
 
     if (action === 'initiate') {
       // STK Push initiation
-      const { orderId, phone, amount }: PaymentRequest = await req.json();
+      const { orderId, phone, amount } = await req.json();
       
-      // Input validation
-      if (!validateOrderId(orderId)) {
-        return new Response(JSON.stringify({ error: 'Invalid order ID format' }), {
-          status: 400,
-          headers: { 'Content-Type': 'application/json', ...corsHeaders },
-        });
-      }
-      
+      // Input validation for phone
       if (!validatePhoneNumber(phone)) {
         return new Response(JSON.stringify({ error: 'Invalid phone number format' }), {
           status: 400,
@@ -74,15 +67,13 @@ const handler = async (req: Request): Promise<Response> => {
         });
       }
       
+      // Input validation for amount
       if (!amount || amount <= 0 || amount > 1000000) {
         return new Response(JSON.stringify({ error: 'Invalid amount' }), {
           status: 400,
           headers: { 'Content-Type': 'application/json', ...corsHeaders },
         });
       }
-      
-      // For STK push, we'll create a temporary order if it doesn't exist
-      // In a real implementation, you'd first create the order, then initiate payment
       
       console.log(`Initiating STK Push for phone ${phone}, amount ${amount}`);
       
