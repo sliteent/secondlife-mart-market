@@ -106,9 +106,10 @@ const sampleProducts: Product[] = [
 
 interface ProductGridProps {
   onAddToCart?: (product: LegacyProduct) => void;
+  searchQuery?: string;
 }
 
-export function ProductGrid({ onAddToCart }: ProductGridProps) {
+export function ProductGrid({ onAddToCart, searchQuery = '' }: ProductGridProps) {
   const [sortBy, setSortBy] = useState('featured');
   const [filterCondition, setFilterCondition] = useState('all');
   const [filterCategory, setFilterCategory] = useState('all');
@@ -206,7 +207,13 @@ export function ProductGrid({ onAddToCart }: ProductGridProps) {
 
         {/* Products Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {products.map((product) => (
+          {products
+            .filter(product => 
+              searchQuery === '' || 
+              product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+              product.description?.toLowerCase().includes(searchQuery.toLowerCase())
+            )
+            .map((product) => (
             <ProductCard
               key={product.id}
               product={{

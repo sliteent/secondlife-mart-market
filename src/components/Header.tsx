@@ -9,7 +9,7 @@ interface HeaderProps {
   cartItemsCount?: number;
   onCartClick?: () => void;
   onSearchChange?: (query: string) => void;
-  onNavigate?: (section: string) => void;
+  onNavigate?: (section: 'home' | 'track' | 'contact' | 'categories') => void;
   currentSection?: string;
 }
 
@@ -28,7 +28,7 @@ export function Header({
     onSearchChange?.(value);
   };
 
-  const handleNavClick = (section: string) => {
+  const handleNavClick = (section: 'home' | 'track' | 'contact' | 'categories') => {
     onNavigate?.(section);
     setIsMobileMenuOpen(false);
   };
@@ -62,7 +62,7 @@ export function Header({
             {navItems.map((item) => (
               <button
                 key={item.id}
-                onClick={() => handleNavClick(item.id)}
+                onClick={() => handleNavClick(item.id as 'home' | 'track' | 'contact' | 'categories')}
                 className={`flex items-center gap-2 text-sm font-medium transition-colors hover:text-primary ${
                   currentSection === item.id ? 'text-primary' : 'text-foreground'
                 }`}
@@ -149,7 +149,7 @@ export function Header({
                   className={`justify-start ${
                     currentSection === item.id ? 'bg-primary/10 text-primary' : ''
                   }`}
-                  onClick={() => handleNavClick(item.id)}
+                  onClick={() => handleNavClick(item.id as 'home' | 'track' | 'contact' | 'categories')}
                 >
                   {item.icon && <item.icon className="h-4 w-4 mr-2" />}
                   {item.label}
