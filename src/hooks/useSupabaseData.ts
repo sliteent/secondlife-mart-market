@@ -228,8 +228,8 @@ export const createOrder = async (orderData: {
       throw new Error('Invalid email format');
     }
     
-    if (!orderData.delivery_address || orderData.delivery_address.trim().length < 10) {
-      throw new Error('Delivery address must be at least 10 characters long');
+    if (!orderData.delivery_address || orderData.delivery_address.trim().length < 5) {
+      throw new Error('Delivery address must be at least 5 characters long');
     }
     
     if (!orderData.county || !orderData.town) {

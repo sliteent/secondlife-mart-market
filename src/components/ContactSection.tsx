@@ -29,7 +29,7 @@ export function ContactSection() {
                   </div>
                   <div>
                     <h4 className="font-semibold text-foreground">Phone</h4>
-                    <p className="text-muted-foreground">+254711127868</p>
+                    <p className="text-muted-foreground">+254711471130</p>
                     <p className="text-sm text-muted-foreground">Call us for immediate assistance</p>
                   </div>
                 </div>
@@ -117,7 +117,7 @@ export function ContactSection() {
                 <label className="text-sm font-medium text-foreground mb-2 block">
                   Phone Number
                 </label>
-                <Input type="tel" placeholder="+254711127868" />
+                <Input type="tel" placeholder="+254711471130" />
               </div>
 
               <div>

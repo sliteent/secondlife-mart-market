@@ -290,7 +290,7 @@ export function CheckoutModal({ isOpen, onClose, items, total, onConfirmOrder }:
                           });
                           const result = await response.json();
                           if (result.success) {
-                            alert('STK Push sent to your phone. Please enter your M-Pesa PIN to complete payment.');
+                            alert('STK Push simulation sent! In a real scenario, you would receive a prompt on your phone. For testing, you can proceed to confirm your order.');
                           } else {
                             alert('Failed to send STK Push: ' + result.error);
                           }
