@@ -1,14 +1,15 @@
-User-agent: Googlebot
-Allow: /
-
-User-agent: Bingbot
-Allow: /
-
-User-agent: Twitterbot
-Allow: /
-
-User-agent: facebookexternalhit
-Allow: /
-
 User-agent: *
 Allow: /
+Allow: /products
+Allow: /categories
+Allow: /contact
+Allow: /about
+Allow: /terms
+Allow: /privacy
+Allow: /return-policy
+
+Disallow: /admin
+Disallow: /checkout
+Disallow: /cart
+
+Sitemap: https://secondlifemartmarket.com/sitemap.xml

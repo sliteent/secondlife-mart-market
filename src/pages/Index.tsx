@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { Header } from '@/components/Header';
 import { HeroSection } from '@/components/HeroSection';
 import { CategoryGrid } from '@/components/CategoryGrid';
@@ -8,6 +9,7 @@ import { CheckoutModal } from '@/components/CheckoutModal';
 import { OrderTrackingSection } from '@/components/OrderTrackingSection';
 import { ContactSection } from '@/components/ContactSection';
 import { Footer } from '@/components/Footer';
+import { MiniCart } from '@/components/MiniCart';
 import { LegacyProduct } from '@/hooks/useSupabaseData';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
@@ -91,15 +93,74 @@ const Index = () => {
   const deliveryFee = cartTotal > 2000 ? 0 : 200;
   const totalWithDelivery = cartTotal + deliveryFee;
 
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "SecondLife Mart Market",
+    "description": "Kenya's premier marketplace for quality pre-owned and new products",
+    "url": "https://secondlifemartmarket.com",
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": "https://secondlifemartmarket.com/?search={search_term_string}",
+      "query-input": "required name=search_term_string"
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "SecondLife Mart Market",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://secondlifemartmarket.com/src/assets/logo.png"
+      }
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-background">
-      <Header 
-        cartItemsCount={cartItemsCount}
-        onCartClick={() => setIsCartOpen(true)}
-        onSearchChange={setSearchQuery}
-        onNavigate={setCurrentView}
-        currentSection={currentView}
-      />
+    <>
+      <Helmet>
+        <title>SecondLife Mart Market - Quality Pre-owned & New Products in Kenya</title>
+        <meta name="description" content="Discover thousands of quality new and pre-loved items from electronics to fashion at SecondLife Mart Market. Quality guaranteed, prices that can't be beaten. Free delivery on orders over KSh 2,000." />
+        <meta name="keywords" content="second hand, marketplace, electronics, fashion, quality products, affordable prices, Kenya, Nairobi, online shopping, pre-owned, refurbished" />
+        
+        {/* Open Graph / Facebook */}
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://secondlifemartmarket.com/" />
+        <meta property="og:title" content="SecondLife Mart Market - Quality Pre-owned & New Products" />
+        <meta property="og:description" content="Discover thousands of quality new and pre-loved items from electronics to fashion. Quality guaranteed, prices that can't be beaten." />
+        <meta property="og:image" content="https://secondlifemartmarket.com/src/assets/hero-image.jpg" />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        <meta property="og:locale" content="en_KE" />
+        <meta property="og:site_name" content="SecondLife Mart Market" />
+
+        {/* Twitter */}
+        <meta property="twitter:card" content="summary_large_image" />
+        <meta property="twitter:url" content="https://secondlifemartmarket.com/" />
+        <meta property="twitter:title" content="SecondLife Mart Market - Quality Pre-owned & New Products" />
+        <meta property="twitter:description" content="Discover thousands of quality new and pre-loved items from electronics to fashion. Quality guaranteed, prices that can't be beaten." />
+        <meta property="twitter:image" content="https://secondlifemartmarket.com/src/assets/hero-image.jpg" />
+
+        {/* Additional SEO */}
+        <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+        <link rel="canonical" href="https://secondlifemartmarket.com/" />
+        <meta name="author" content="Samuel Theuri" />
+        <meta name="geo.region" content="KE" />
+        <meta name="geo.placename" content="Nairobi" />
+        <meta name="language" content="English" />
+        
+        {/* Structured Data */}
+        <script type="application/ld+json">
+          {JSON.stringify(structuredData)}
+        </script>
+      </Helmet>
+
+      <div className="min-h-screen bg-background">
+        <Header 
+          cartItemsCount={cartItemsCount}
+          onCartClick={() => setIsCartOpen(true)}
+          onSearchChange={setSearchQuery}
+          onNavigate={setCurrentView}
+          currentSection={currentView}
+        />
 
       {/* Main Content */}
       {currentView === 'home' ? (
@@ -142,7 +203,15 @@ const Index = () => {
         total={totalWithDelivery}
         onConfirmOrder={handleConfirmOrder}
       />
-    </div>
+
+      {/* Mini Cart */}
+      <MiniCart
+        itemCount={cartItemsCount}
+        total={cartTotal}
+        onClick={() => setIsCartOpen(true)}
+      />
+      </div>
+    </>
   );
 };
 

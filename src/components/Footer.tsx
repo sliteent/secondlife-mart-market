@@ -1,4 +1,5 @@
 import { Smartphone, Mail, MapPin, Facebook, Twitter, Instagram } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 export function Footer() {
   return (
@@ -23,11 +24,12 @@ export function Footer() {
           <div>
             <h4 className="font-semibold mb-4">Quick Links</h4>
             <ul className="space-y-2 text-sm">
-              <li><a href="#" className="text-muted-foreground hover:text-primary">About Us</a></li>
-              <li><a href="#" className="text-muted-foreground hover:text-primary">Contact</a></li>
-              <li><a href="#" className="text-muted-foreground hover:text-primary">Track Order</a></li>
-              <li><a href="#" className="text-muted-foreground hover:text-primary">Return Policy</a></li>
-              <li><a href="#" className="text-muted-foreground hover:text-primary">Terms & Conditions</a></li>
+              <li><Link to="/about" className="text-muted-foreground hover:text-primary transition-colors">About Us</Link></li>
+              <li><a href="#contact" className="text-muted-foreground hover:text-primary transition-colors">Contact</a></li>
+              <li><a href="#track" className="text-muted-foreground hover:text-primary transition-colors">Track Order</a></li>
+              <li><Link to="/return-policy" className="text-muted-foreground hover:text-primary transition-colors">Return Policy</Link></li>
+              <li><Link to="/terms" className="text-muted-foreground hover:text-primary transition-colors">Terms & Conditions</Link></li>
+              <li><Link to="/privacy" className="text-muted-foreground hover:text-primary transition-colors">Privacy Policy</Link></li>
             </ul>
           </div>
 

@@ -361,6 +361,7 @@ export type Database = {
           delivery_fee: number
           estimated_delivery_date: string | null
           id: string
+          mpesa_checkout_request_id: string | null
           mpesa_transaction_code: string | null
           order_id: string
           payment_method: string
@@ -379,6 +380,7 @@ export type Database = {
           delivery_fee?: number
           estimated_delivery_date?: string | null
           id?: string
+          mpesa_checkout_request_id?: string | null
           mpesa_transaction_code?: string | null
           order_id: string
           payment_method?: string
@@ -397,6 +399,7 @@ export type Database = {
           delivery_fee?: number
           estimated_delivery_date?: string | null
           id?: string
+          mpesa_checkout_request_id?: string | null
           mpesa_transaction_code?: string | null
           order_id?: string
           payment_method?: string
