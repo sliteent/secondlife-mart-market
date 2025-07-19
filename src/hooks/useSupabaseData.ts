@@ -153,15 +153,19 @@ export const useOrderTracking = (orderId: string, phone: string) => {
     setError(null);
 
     try {
-      // Fetch order
+      // Fetch order - use .maybeSingle() to avoid errors when no order is found
       const { data: orderData, error: orderError } = await supabase
         .from('orders')
         .select('*')
         .eq('order_id', orderId)
         .eq('customer_phone', phone)
-        .single();
+        .maybeSingle();
 
       if (orderError) throw orderError;
+      
+      if (!orderData) {
+        throw new Error('Order not found. Please check your Order ID and phone number.');
+      }
       setOrder(orderData as Order);
 
       // Fetch order items with product details
@@ -277,8 +281,9 @@ export const createOrder = async (orderData: {
 
     if (itemsError) throw itemsError;
 
-    // Send email notification to admin
+    // Send email notifications
     try {
+      // Send admin notification
       await supabase.functions.invoke('send-order-email', {
         body: {
           orderId: order.order_id,
@@ -299,8 +304,26 @@ export const createOrder = async (orderData: {
           }
         }
       });
+
+      // Send customer confirmation email if email provided
+      if (order.customer_email) {
+        await supabase.functions.invoke('send-order-confirmation', {
+          body: {
+            orderId: order.order_id,
+            customerEmail: order.customer_email,
+            customerName: order.customer_name,
+            items: orderData.items.map(item => ({
+              name: 'Product', // You might want to fetch product names here
+              quantity: item.quantity,
+              price: item.unit_price
+            })),
+            total: order.total_amount,
+            deliveryAddress: `${order.delivery_address}, ${order.town}, ${order.county}`
+          }
+        });
+      }
     } catch (emailError) {
-      console.warn('Failed to send admin email notification:', emailError);
+      console.warn('Failed to send email notifications:', emailError);
       // Don't fail the order creation if email fails
     }
 

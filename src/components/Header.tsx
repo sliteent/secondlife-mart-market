@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Search, ShoppingCart, User, Menu, X, Package, Phone } from 'lucide-react';
+import { Search, ShoppingCart, User, Menu, X, Package, Phone, Heart } from 'lucide-react';
 import logo from '@/assets/logo.png';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -92,6 +92,13 @@ export function Header({
             {/* User Account */}
             <Button variant="ghost" size="icon" className="hidden md:flex">
               <User className="h-5 w-5" />
+            </Button>
+
+            {/* Wishlist */}
+            <Button variant="ghost" size="icon" asChild>
+              <a href="/wishlist">
+                <Heart className="h-5 w-5" />
+              </a>
             </Button>
 
             {/* Shopping Cart */}

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { ProductCard, Product } from './ProductCard';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Filter } from 'lucide-react';
 import { useProducts, useCategories, LegacyProduct } from '@/hooks/useSupabaseData';
@@ -113,6 +114,7 @@ export function ProductGrid({ onAddToCart, searchQuery = '' }: ProductGridProps)
   const [sortBy, setSortBy] = useState('featured');
   const [filterCondition, setFilterCondition] = useState('all');
   const [filterCategory, setFilterCategory] = useState('all');
+  const [priceRange, setPriceRange] = useState({ min: '', max: '' });
 
   const { categories } = useCategories();
   const { products, loading, error } = useProducts(
@@ -190,6 +192,24 @@ export function ProductGrid({ onAddToCart, searchQuery = '' }: ProductGridProps)
               </SelectContent>
             </Select>
 
+            <div className="flex gap-2 items-center">
+              <Input
+                placeholder="Min price"
+                value={priceRange.min}
+                onChange={(e) => setPriceRange(prev => ({ ...prev, min: e.target.value }))}
+                className="w-[100px]"
+                type="number"
+              />
+              <span className="text-muted-foreground">to</span>
+              <Input
+                placeholder="Max price"
+                value={priceRange.max}
+                onChange={(e) => setPriceRange(prev => ({ ...prev, max: e.target.value }))}
+                className="w-[100px]"
+                type="number"
+              />
+            </div>
+
             <Select value={sortBy} onValueChange={setSortBy}>
               <SelectTrigger className="w-[140px]">
                 <SelectValue placeholder="Sort by" />
@@ -208,11 +228,32 @@ export function ProductGrid({ onAddToCart, searchQuery = '' }: ProductGridProps)
         {/* Products Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {products
-            .filter(product => 
-              searchQuery === '' || 
-              product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-              product.description?.toLowerCase().includes(searchQuery.toLowerCase())
-            )
+            .filter(product => {
+              // Search filter
+              const matchesSearch = searchQuery === '' || 
+                product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                product.description?.toLowerCase().includes(searchQuery.toLowerCase());
+              
+              // Price filter
+              const matchesPrice = (!priceRange.min || product.price >= Number(priceRange.min)) &&
+                (!priceRange.max || product.price <= Number(priceRange.max));
+              
+              return matchesSearch && matchesPrice;
+            })
+            .sort((a, b) => {
+              switch (sortBy) {
+                case 'price-low':
+                  return a.price - b.price;
+                case 'price-high':
+                  return b.price - a.price;
+                case 'newest':
+                  return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+                case 'rating':
+                  return 4.5 - 4.5; // Default since we don't have real ratings yet
+                default:
+                  return 0;
+              }
+            })
             .map((product) => (
             <ProductCard
               key={product.id}

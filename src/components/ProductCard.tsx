@@ -3,6 +3,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useState } from 'react';
+import { WishlistButton } from './WishlistButton';
 
 export interface Product {
   id: string;
@@ -76,14 +77,10 @@ export function ProductCard({ product, onAddToCart, onToggleWishlist }: ProductC
           )}
           
           {/* Wishlist button */}
-          <Button
-            variant="ghost"
-            size="icon"
+          <WishlistButton
+            productId={product.id}
             className="absolute bottom-3 right-3 h-9 w-9 bg-background/90 hover:bg-background shadow-md"
-            onClick={handleWishlistClick}
-          >
-            <Heart className={`h-4 w-4 ${isWishlisted ? 'fill-destructive text-destructive' : ''}`} />
-          </Button>
+          />
         </div>
 
         {/* Product info */}

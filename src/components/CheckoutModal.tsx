@@ -71,7 +71,7 @@ export function CheckoutModal({ isOpen, onClose, items, total, onConfirmOrder }:
       if (result.success && result.order) {
         // Verify M-Pesa transaction if code provided
         if (orderData.mpesaCode) {
-          await fetch(`https://bsqiylycebkxliggotxw.supabase.co/functions/v1/mpesa-payment?action=verify`, {
+          await fetch(`https://bsqiylycebkxliggotxw.supabase.co/functions/v1/mpesa-stk-push?action=verify`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -279,7 +279,7 @@ export function CheckoutModal({ isOpen, onClose, items, total, onConfirmOrder }:
                     <Button 
                       onClick={async () => {
                         try {
-                          const response = await fetch(`https://bsqiylycebkxliggotxw.supabase.co/functions/v1/mpesa-payment?action=initiate`, {
+                          const response = await fetch(`https://bsqiylycebkxliggotxw.supabase.co/functions/v1/mpesa-stk-push?action=initiate`, {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({
@@ -290,7 +290,7 @@ export function CheckoutModal({ isOpen, onClose, items, total, onConfirmOrder }:
                           });
                           const result = await response.json();
                           if (result.success) {
-                            alert('STK Push simulation sent! In a real scenario, you would receive a prompt on your phone. For testing, you can proceed to confirm your order.');
+                            alert('STK Push sent! You will receive a prompt on your phone to complete the payment. Please enter your M-Pesa PIN.');
                           } else {
                             alert('Failed to send STK Push: ' + result.error);
                           }
