@@ -35,11 +35,11 @@ export function ShoppingCart({
   return (
     <div className="fixed inset-0 z-50 bg-black/50" onClick={onClose}>
       <div 
-        className="fixed right-0 top-0 h-full w-full max-w-md bg-background shadow-xl transform transition-transform"
+        className="fixed right-0 top-0 h-full w-full max-w-md bg-background shadow-xl transform transition-transform flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b">
+        <div className="flex items-center justify-between p-4 border-b flex-shrink-0">
           <h2 className="text-lg font-semibold flex items-center">
             <ShoppingBag className="h-5 w-5 mr-2" />
             Shopping Cart ({items.length})
@@ -50,7 +50,7 @@ export function ShoppingCart({
         </div>
 
         {/* Cart Items */}
-        <div className="flex-1 overflow-y-auto p-4 h-[calc(100vh-200px)]">
+        <div className="flex-1 overflow-y-auto p-4 min-h-0">
           {items.length === 0 ? (
             <div className="text-center py-8">
               <ShoppingBag className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
@@ -129,7 +129,7 @@ export function ShoppingCart({
 
         {/* Cart Summary */}
         {items.length > 0 && (
-          <div className="border-t p-4 space-y-3">
+          <div className="border-t p-4 space-y-3 flex-shrink-0">
             <div className="space-y-2">
               <div className="flex justify-between text-sm">
                 <span>Subtotal</span>

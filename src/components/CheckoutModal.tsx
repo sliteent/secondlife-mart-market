@@ -103,11 +103,11 @@ export function CheckoutModal({ isOpen, onClose, items, total, onConfirmOrder }:
   return (
     <div className="fixed inset-0 z-50 bg-black/50" onClick={onClose}>
       <div 
-        className="fixed inset-4 md:inset-8 bg-background rounded-lg shadow-xl overflow-hidden"
+        className="fixed inset-4 md:inset-8 bg-background rounded-lg shadow-xl overflow-hidden flex flex-col max-h-[90vh]"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b">
+        <div className="flex items-center justify-between p-4 border-b flex-shrink-0">
           <h2 className="text-xl font-semibold">Checkout</h2>
           <Button variant="ghost" size="icon" onClick={onClose}>
             <X className="h-5 w-5" />
@@ -115,7 +115,7 @@ export function CheckoutModal({ isOpen, onClose, items, total, onConfirmOrder }:
         </div>
 
         {/* Progress Steps */}
-        <div className="flex items-center justify-center space-x-4 p-4 bg-muted/50">
+        <div className="flex items-center justify-center space-x-4 p-4 bg-muted/50 flex-shrink-0">
           {[1, 2, 3].map((stepNumber) => (
             <div key={stepNumber} className="flex items-center">
               <div
@@ -136,7 +136,7 @@ export function CheckoutModal({ isOpen, onClose, items, total, onConfirmOrder }:
           ))}
         </div>
 
-        <div className="flex-1 overflow-y-auto p-4">
+        <div className="flex-1 overflow-y-auto p-4 min-h-0">
           <div className="max-w-4xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Main Content */}
             <div className="lg:col-span-2">
@@ -374,11 +374,11 @@ export function CheckoutModal({ isOpen, onClose, items, total, onConfirmOrder }:
         </div>
 
         {/* Footer */}
-        <div className="border-t p-4 flex justify-between">
+        <div className="border-t p-4 flex justify-between flex-shrink-0">
           <Button variant="outline" onClick={step > 1 ? handleBack : onClose}>
             {step > 1 ? 'Back' : 'Cancel'}
           </Button>
-            <Button 
+          <Button 
             onClick={step < 3 ? handleNext : handleConfirmOrder}
             disabled={
               (step === 1 && (!orderData.firstName || !orderData.lastName || !orderData.phone)) ||
