@@ -51,7 +51,7 @@ export function Footer() {
             <div className="space-y-3 text-sm">
               <div className="flex items-center space-x-2">
                 <Smartphone className="h-4 w-4 text-primary" />
-                <span className="text-muted-foreground">+254 722 123 456</span>
+                <span className="text-muted-foreground">+254 711471130</span>
               </div>
               <div className="flex items-center space-x-2">
                 <Mail className="h-4 w-4 text-primary" />
@@ -74,7 +74,7 @@ export function Footer() {
               © Samuel Theuri 2025. All rights reserved.
             </p>
             <div className="text-sm text-muted-foreground">
-              <span>M-Pesa Till: </span>
+              <span>M-Pesa Send money: </span>
               <span className="font-mono font-medium text-primary">0110299083</span>
             </div>
           </div>
